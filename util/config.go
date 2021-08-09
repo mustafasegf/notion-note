@@ -5,6 +5,8 @@ import "github.com/spf13/viper"
 type Config struct {
 	NotionToken      string `mapstructure:"NOTION_TOKEN"`
 	NotionDatabaseID string `mapstructure:"NOTION_DATABASE_ID"`
+	LineSecret       string `mapstructure:"LINE_SECRET"`
+	LineToken        string `mapstructure:"LINE_TOKEN"`
 }
 
 func LoadConfig() (config Config, err error) {
