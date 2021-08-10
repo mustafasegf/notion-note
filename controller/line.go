@@ -36,6 +36,9 @@ func (ctrl *Line) LineCallback(w http.ResponseWriter, req *http.Request) {
 			switch message := event.Message.(type) {
 			case *linebot.TextMessage:
 				title, body := util.ParseText(message.Text)
+				if title == "" {
+					return
+				}
 				_, err = ctrl.notion.CreateNote(title, body)
 				res := "created"
 				if err != nil {
