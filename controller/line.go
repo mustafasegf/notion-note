@@ -5,19 +5,19 @@ import (
 	"net/http"
 
 	"github.com/line/line-bot-sdk-go/v7/linebot"
-	"github.com/mustafasegf/notion-note/core"
+	"github.com/mustafasegf/notion-note/service"
 	"github.com/mustafasegf/notion-note/util"
 )
 
 type Line struct {
-	bot    *linebot.Client
-	notion core.Notion
+	svc *service.Line
+	bot *linebot.Client
 }
 
-func NewLinkController(bot *linebot.Client, notion core.Notion) *Line {
+func NewLinkController(bot *linebot.Client, svc *service.Line) *Line {
 	return &Line{
-		bot:    bot,
-		notion: notion,
+		svc: svc,
+		bot: bot,
 	}
 }
 
@@ -31,22 +31,24 @@ func (ctrl *Line) LineCallback(w http.ResponseWriter, req *http.Request) {
 		}
 		return
 	}
+
 	for _, event := range events {
 		if event.Type == linebot.EventTypeMessage {
 			switch message := event.Message.(type) {
 			case *linebot.TextMessage:
-				title, body := util.ParseText(message.Text)
-				if title == "" {
+				if !util.CheckIfCommand(message.Text) {
 					return
 				}
-				_, err = ctrl.notion.CreateNote(title, body)
-				res := "created"
-				if err != nil {
-					log.Println(err)
-					res = "failed"
-				}
-				if _, err = ctrl.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(res)).Do(); err != nil {
-					log.Print(err)
+				switch util.GetCommand(message.Text) {
+				case "note":
+					title, body := util.ParseText(message.Text)
+					res, err := ctrl.svc.CreateNote(title, body)
+					if err != nil {
+						log.Println(err)
+					}
+					if _, err = ctrl.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(res)).Do(); err != nil {
+						log.Print(err)
+					}
 				}
 			}
 		}
