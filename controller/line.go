@@ -49,6 +49,21 @@ func (ctrl *Line) LineCallback(w http.ResponseWriter, req *http.Request) {
 					if _, err = ctrl.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(res)).Do(); err != nil {
 						log.Print(err)
 					}
+				case "add":
+					page, err := ctrl.svc.GetLatestNote()
+					pageID := page.Results[0].ID
+					body := util.ParseTextAdd(message.Text)
+					res, err := ctrl.svc.AppendNote(string(pageID), body)
+					if err != nil {
+						log.Println(err)
+					}
+					if _, err = ctrl.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(res)).Do(); err != nil {
+						log.Print(err)
+					}
+				case "help":
+					if _, err = ctrl.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(util.Help)).Do(); err != nil {
+						log.Print(err)
+					}
 				}
 			}
 		}
