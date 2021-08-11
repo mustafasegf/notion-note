@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/jomei/notionapi"
 	"github.com/line/line-bot-sdk-go/v7/linebot"
@@ -24,14 +25,20 @@ func NewLineService(bot *linebot.Client, repo *repo.Line) *Line {
 	}
 }
 
-func (svc *Line) CreateNote(userID, title, body string) (status string, err error) {
+func (svc *Line) CreateNote(userID, title, body, tags string) (status string, err error) {
 	creds, err := svc.GetNotionCreds(userID)
 	if err != nil {
 		status = err.Error()
 		return
 	}
 	notion := core.Notion{Client: notionapi.NewClient(notionapi.Token(creds.Token))}
-	_, err = notion.CreateNote(title, body, creds.DatabaseID)
+	if tags == "" {
+		_, err = notion.CreateNote(title, body, creds.DatabaseID)
+	} else {
+		tagsArr := strings.Split(tags, " ")
+		_, err = notion.CreateNoteWithTags(title, body, tagsArr, creds.DatabaseID)
+	}
+
 	status = "successs"
 	if err != nil {
 		status = err.Error()

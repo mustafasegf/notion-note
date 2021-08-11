@@ -42,8 +42,13 @@ func (ctrl *Line) LineCallback(w http.ResponseWriter, req *http.Request) {
 				userID := event.Source.UserID
 				switch util.GetCommand(message.Text) {
 				case "note":
-					title, body := util.ParseText(message.Text)
-					res, err := ctrl.svc.CreateNote(userID, title, body)
+					token := util.Tokenizer(message.Text)
+					title, body := token["note"], token["body"]
+					tags, ok := token["tags"]
+					if !ok {
+						tags = ""
+					}
+					res, err := ctrl.svc.CreateNote(userID, title, body, tags)
 					if err != nil {
 						log.Println(err)
 					}

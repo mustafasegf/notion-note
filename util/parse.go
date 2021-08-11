@@ -39,6 +39,22 @@ func ParseText(body string) (title, content string) {
 	return
 }
 
+func Tokenizer(body string) (res map[string]string) {
+	res = make(map[string]string)
+	lines := strings.Split(body, "\n")
+	for _, line := range lines {
+		if line[0] == '/' {
+			words := strings.SplitN(line[1:], " ", 2)
+			if len(words) > 0 {
+				res[words[0]] = words[1]
+			}
+		} else {
+			res["body"] += line + "\n"
+		}
+	}
+	return
+}
+
 func ParseTextOne(body string) (content string) {
 	lines := strings.FieldsFunc(body, func(r rune) bool { return r == ' ' || r == '\n' })
 	if len(lines) > 0 {
