@@ -33,7 +33,7 @@ func main() {
 	util.SetLogger()
 	server := api.MakeServer(bot, db)
 	server.SetupRouter()
-	server.RunServer()
+	server.RunServer(config.ServerPort)
 
 	defer func() {
 		if err = db.Disconnect(context.Background()); err != nil {
