@@ -9,6 +9,7 @@ import (
 	"github.com/mustafasegf/notion-note/core"
 	"github.com/mustafasegf/notion-note/entity"
 	"github.com/mustafasegf/notion-note/repo"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Line struct {
@@ -26,16 +27,14 @@ func NewLineService(bot *linebot.Client, repo *repo.Line) *Line {
 func (svc *Line) CreateNote(userID, title, body string) (status string, err error) {
 	creds, err := svc.GetNotionCreds(userID)
 	if err != nil {
-		log.Println(err)
-		status = "failed"
+		status = err.Error()
 		return
 	}
 	notion := core.Notion{Client: notionapi.NewClient(notionapi.Token(creds.Token))}
 	_, err = notion.CreateNote(title, body, creds.DatabaseID)
 	status = "successs"
 	if err != nil {
-		log.Println(err)
-		status = "failed"
+		status = err.Error()
 	}
 	return
 }
@@ -54,8 +53,7 @@ func (svc *Line) GetLatestNote(userID string) (page *notionapi.DatabaseQueryResp
 func (svc *Line) AppendNote(userID, pageID, body string) (status string, err error) {
 	creds, err := svc.GetNotionCreds(userID)
 	if err != nil {
-		log.Println(err)
-		status = "failed"
+		status = err.Error()
 		return
 	}
 	notion := core.Notion{Client: notionapi.NewClient(notionapi.Token(creds.Token))}
@@ -90,15 +88,16 @@ func (svc *Line) UpdateDatabase(userID, databaseID string) (status string) {
 
 func (svc *Line) GetNotionCreds(userID string) (res entity.NotionCreds, err error) {
 	res, err = svc.repo.GetNotionCreds(userID)
-	if err != nil {
+	if err != nil && err != mongo.ErrNoDocuments {
 		log.Println(err)
 		return
 	}
+
 	if res.DatabaseID == "" {
-		err = fmt.Errorf("no database id")
+		err = fmt.Errorf("no database id. Please use /page [databaseID] to set database\n")
 	}
 	if res.Token == "" {
-		err = fmt.Errorf("%v, no token", err)
+		err = fmt.Errorf("no notion secret token. Go to https://www.notion.so/my-integrations to get your token and use /token [token] to set token\n\n%v", err)
 	}
 	return
 }
