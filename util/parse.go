@@ -10,7 +10,13 @@ var (
 [content]
 
 Append to last note
-/add [content]`
+/add [content]
+
+Set notion token
+/token [token]
+
+Set notion database id
+/page [database_id]`
 )
 
 func CheckIfCommand(body string) (valid bool) {
@@ -33,7 +39,10 @@ func ParseText(body string) (title, content string) {
 	return
 }
 
-func ParseTextAdd(body string) (content string) {
-	content = body[5:]
+func ParseTextOne(body string) (content string) {
+	lines := strings.FieldsFunc(body, func(r rune) bool { return r == ' ' || r == '\n' })
+	if len(lines) > 0 {
+		content = lines[1]
+	}
 	return
 }

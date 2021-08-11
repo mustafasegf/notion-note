@@ -14,7 +14,7 @@ type Line struct {
 	bot *linebot.Client
 }
 
-func NewLinkController(bot *linebot.Client, svc *service.Line) *Line {
+func NewLineController(bot *linebot.Client, svc *service.Line) *Line {
 	return &Line{
 		svc: svc,
 		bot: bot,
@@ -52,7 +52,7 @@ func (ctrl *Line) LineCallback(w http.ResponseWriter, req *http.Request) {
 				case "add":
 					page, err := ctrl.svc.GetLatestNote()
 					pageID := page.Results[0].ID
-					body := util.ParseTextAdd(message.Text)
+					body := util.ParseTextOne(message.Text)
 					res, err := ctrl.svc.AppendNote(string(pageID), body)
 					if err != nil {
 						log.Println(err)
@@ -62,6 +62,18 @@ func (ctrl *Line) LineCallback(w http.ResponseWriter, req *http.Request) {
 					}
 				case "help":
 					if _, err = ctrl.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(util.Help)).Do(); err != nil {
+						log.Print(err)
+					}
+				case "token":
+					token := util.ParseTextOne(message.Text)
+					res := ctrl.svc.UpdateToken(event.Source.UserID, token)
+					if _, err = ctrl.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(res)).Do(); err != nil {
+						log.Print(err)
+					}
+				case "page":
+					databaseID := util.ParseTextOne(message.Text)
+					res := ctrl.svc.UpdateDatabase(event.Source.UserID, databaseID)
+					if _, err = ctrl.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(res)).Do(); err != nil {
 						log.Print(err)
 					}
 				}

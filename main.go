@@ -1,25 +1,49 @@
 package main
 
 import (
+	"context"
+	"log"
+	"time"
+
 	"github.com/jomei/notionapi"
 	"github.com/line/line-bot-sdk-go/v7/linebot"
 	"github.com/mustafasegf/notion-note/api"
 	"github.com/mustafasegf/notion-note/core"
 	"github.com/mustafasegf/notion-note/util"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
-	config, _ := util.LoadConfig()
+	config, err := util.LoadConfig()
+	if err != nil {
+		log.Panic(err)
+	}
 
 	client := notionapi.NewClient(notionapi.Token(config.NotionToken))
-	bot, _ := linebot.New(config.LineSecret, config.LineToken)
+	bot, err := linebot.New(config.LineSecret, config.LineToken)
+	if err != nil {
+		log.Panic(err)
+	}
 
 	notion := core.Notion{
 		Config: config,
 		Client: client,
 	}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	db, err := mongo.Connect(ctx, options.Client().ApplyURI(config.MongoURI))
+	if err != nil {
+		log.Panic(err)
+	}
 
-	server := api.MakeServer(bot, notion)
+	server := api.MakeServer(bot, notion, db)
 	server.SetupRouter()
 	server.RunServer()
+
+	defer func() {
+		if err = db.Disconnect(context.Background()); err != nil {
+			panic(err)
+		}
+	}()
 }
