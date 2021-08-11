@@ -7,15 +7,13 @@ import (
 )
 
 type Config struct {
-	NotionToken      string `mapstructure:"NOTION_TOKEN"`
-	NotionDatabaseID string `mapstructure:"NOTION_DATABASE_ID"`
-	LineSecret       string `mapstructure:"LINE_SECRET"`
-	LineToken        string `mapstructure:"LINE_TOKEN"`
-	MongoHost        string `mapstructure:"MONGO_HOST"`
-	MongoUsername    string `mapstructure:"MONGO_INITDB_ROOT_USERNAME"`
-	MongoPassword    string `mapstructure:"MONGO_INITDB_ROOT_PASSWORD"`
-	MongoURI         string
-	ServerPort       string `mapstructure:"SERVER_PORT"`
+	LineSecret    string `mapstructure:"LINE_SECRET"`
+	LineToken     string `mapstructure:"LINE_TOKEN"`
+	MongoHost     string `mapstructure:"MONGO_HOST"`
+	MongoUsername string `mapstructure:"MONGO_INITDB_ROOT_USERNAME"`
+	MongoPassword string `mapstructure:"MONGO_INITDB_ROOT_PASSWORD"`
+	MongoURI      string
+	ServerPort    string `mapstructure:"SERVER_PORT"`
 }
 
 func LoadConfig() (config Config, err error) {

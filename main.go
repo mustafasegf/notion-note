@@ -5,10 +5,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/jomei/notionapi"
 	"github.com/line/line-bot-sdk-go/v7/linebot"
 	"github.com/mustafasegf/notion-note/api"
-	"github.com/mustafasegf/notion-note/core"
 	"github.com/mustafasegf/notion-note/util"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -20,16 +18,11 @@ func main() {
 		log.Panic(err)
 	}
 
-	client := notionapi.NewClient(notionapi.Token(config.NotionToken))
 	bot, err := linebot.New(config.LineSecret, config.LineToken)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	notion := core.Notion{
-		Config: config,
-		Client: client,
-	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	db, err := mongo.Connect(ctx, options.Client().ApplyURI(config.MongoURI))
@@ -37,7 +30,8 @@ func main() {
 		log.Panic(err)
 	}
 
-	server := api.MakeServer(bot, notion, db)
+	util.SetLogger()
+	server := api.MakeServer(bot, db)
 	server.SetupRouter()
 	server.RunServer()
 

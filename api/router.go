@@ -10,7 +10,7 @@ import (
 
 func (s *Server) SetupRouter() {
 	lineRepo := repo.NewLineRepo(s.Db)
-	lineService := service.NewLineService(s.Line, s.Notion, lineRepo)
+	lineService := service.NewLineService(s.Line, lineRepo)
 	lineController := controller.NewLineController(s.Line, lineService)
 	http.HandleFunc("/callback", lineController.LineCallback)
 }

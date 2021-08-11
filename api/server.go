@@ -5,21 +5,18 @@ import (
 	"net/http"
 
 	"github.com/line/line-bot-sdk-go/v7/linebot"
-	"github.com/mustafasegf/notion-note/core"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Server struct {
-	Line   *linebot.Client
-	Notion core.Notion
-	Db     *mongo.Client
+	Line *linebot.Client
+	Db   *mongo.Client
 }
 
-func MakeServer(line *linebot.Client, notion core.Notion, db *mongo.Client) Server {
+func MakeServer(line *linebot.Client, db *mongo.Client) Server {
 	server := Server{
-		Line:   line,
-		Notion: notion,
-		Db:     db,
+		Line: line,
+		Db:   db,
 	}
 	return server
 }

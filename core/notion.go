@@ -4,18 +4,16 @@ import (
 	"context"
 
 	"github.com/jomei/notionapi"
-	"github.com/mustafasegf/notion-note/util"
 )
 
 type Notion struct {
-	Config util.Config
 	Client *notionapi.Client
 }
 
-func (n *Notion) CreateNote(title, content string) (page *notionapi.Page, err error) {
+func (n *Notion) CreateNote(title, content, databaseID string) (page *notionapi.Page, err error) {
 	page, err = n.Client.Page.Create(context.Background(), &notionapi.PageCreateRequest{
 		Parent: notionapi.Parent{
-			DatabaseID: notionapi.DatabaseID(n.Config.NotionDatabaseID),
+			DatabaseID: notionapi.DatabaseID(databaseID),
 			Type:       notionapi.ParentTypeDatabaseID,
 		},
 		Properties: notionapi.Properties{
@@ -40,8 +38,8 @@ func (n *Notion) CreateNote(title, content string) (page *notionapi.Page, err er
 	return
 }
 
-func (n *Notion) GetLatestNote() (page *notionapi.DatabaseQueryResponse, err error) {
-	page, err = n.Client.Database.Query(context.Background(), notionapi.DatabaseID(n.Config.NotionDatabaseID), &notionapi.DatabaseQueryRequest{
+func (n *Notion) GetLatestNote(databaseID string) (page *notionapi.DatabaseQueryResponse, err error) {
+	page, err = n.Client.Database.Query(context.Background(), notionapi.DatabaseID(databaseID), &notionapi.DatabaseQueryRequest{
 		PageSize: 1,
 	})
 	return
