@@ -8,6 +8,8 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     volumes:
       - ~/mongo/data:/data/db
+    networks:
+      - notion-note
 
   server:
     container_name: server-notion-note
