@@ -1,6 +1,7 @@
 package util
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -43,8 +44,10 @@ func ParseText(body string) (title, content string) {
 func Tokenizer(body string) (res map[string]string) {
 	res = make(map[string]string)
 	lines := strings.Split(body, "\n")
+
+	fmt.Printf("lines: %#v\n", lines)
 	for _, line := range lines {
-		if line[0] == '/' {
+		if len(line) > 0 && line[0] == '/' {
 			words := strings.SplitN(line[1:], " ", 2)
 			if len(words) > 1 {
 				res[words[0]] = strings.Trim(words[1], " ")
