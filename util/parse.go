@@ -9,8 +9,9 @@ var (
 /note [title]
 [content]
 
-Append to last note
-/add [content]
+Append to note. If there's not title it will append to last note
+/add [title]
+[content]
 
 Set notion token
 /token [token]
