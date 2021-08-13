@@ -22,7 +22,7 @@ func MakeServer(line *linebot.Client, db *mongo.Client) Server {
 }
 
 func (s *Server) RunServer(port string) {
-	if err := http.ListenAndServe(":" +port, nil); err != nil {
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -58,11 +58,11 @@ func (ctrl *Line) LineCallback(w http.ResponseWriter, req *http.Request) {
 					}
 				case "add":
 					token := util.Tokenizer(message.Text)
-					add, ok := token["body"]
+					add, ok := token["add"]
 					if !ok {
 						add = ""
 					}
-					body := token["add"]
+					body := token["body"]
 
 					var page *notionapi.DatabaseQueryResponse
 					var pageID notionapi.ObjectID
