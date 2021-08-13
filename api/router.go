@@ -13,4 +13,7 @@ func (s *Server) SetupRouter() {
 	lineService := service.NewLineService(s.Line, lineRepo)
 	lineController := controller.NewLineController(s.Line, lineService)
 	http.HandleFunc("/callback", lineController.LineCallback)
+	http.HandleFunc("/", func(rw http.ResponseWriter, r *http.Request) {
+		rw.Write([]byte("yes"))
+	})
 }

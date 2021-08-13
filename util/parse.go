@@ -45,8 +45,8 @@ func Tokenizer(body string) (res map[string]string) {
 	for _, line := range lines {
 		if line[0] == '/' {
 			words := strings.SplitN(line[1:], " ", 2)
-			if len(words) > 0 {
-				res[words[0]] = words[1]
+			if len(words) > 1 {
+				res[words[0]] = strings.Trim(words[1], " ") 
 			}
 		} else {
 			res["body"] += line + "\n"

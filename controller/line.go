@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/jomei/notionapi"
 	"github.com/line/line-bot-sdk-go/v7/linebot"
 	"github.com/mustafasegf/notion-note/service"
 	"github.com/mustafasegf/notion-note/util"
@@ -56,18 +57,32 @@ func (ctrl *Line) LineCallback(w http.ResponseWriter, req *http.Request) {
 						log.Print(err)
 					}
 				case "add":
-					page, err := ctrl.svc.GetLatestNote(userID)
-					pageID := page.Results[0].ID
-					body := util.ParseTextOne(message.Text)
-					res, err := ctrl.svc.AppendNote(userID, string(pageID), body)
+					token := util.Tokenizer(message.Text)
+					add, ok := token["body"]
+					if !ok {
+						add = ""
+					}
+					body := token["add"]
+
+					var page *notionapi.DatabaseQueryResponse
+					var pageID notionapi.ObjectID
+					res := "failed"
+					if add == "" {
+						page, err = ctrl.svc.GetLatestNote(userID)
+					} else {
+						page, err = ctrl.svc.FindNote(userID, add)
+					}
+
+					if err == nil {
+						pageID = page.Results[0].ID
+						res, err = ctrl.svc.AppendNote(userID, string(pageID), body)
+					}
+
 					if err != nil {
+						res = err.Error()
 						log.Println(err)
 					}
 					if _, err = ctrl.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(res)).Do(); err != nil {
-						log.Print(err)
-					}
-				case "help":
-					if _, err = ctrl.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(util.Help)).Do(); err != nil {
 						log.Print(err)
 					}
 				case "token":
@@ -80,6 +95,11 @@ func (ctrl *Line) LineCallback(w http.ResponseWriter, req *http.Request) {
 					databaseID := util.ParseTextOne(message.Text)
 					res := ctrl.svc.UpdateDatabase(userID, databaseID)
 					if _, err = ctrl.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(res)).Do(); err != nil {
+						log.Print(err)
+					}
+				case "help":
+				default:
+					if _, err = ctrl.bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(util.Help)).Do(); err != nil {
 						log.Print(err)
 					}
 				}

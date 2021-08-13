@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"errors"
 
 	"github.com/jomei/notionapi"
 )
@@ -103,5 +104,42 @@ func (n *Notion) AppendNote(pageID, content string) (page notionapi.Block, err e
 			},
 		},
 	})
+	return
+}
+
+func (n *Notion) GetNote(databaseID, query string) (page *notionapi.DatabaseQueryResponse, err error) {
+	page, err = n.Client.Database.Query(context.Background(), notionapi.DatabaseID(databaseID), &notionapi.DatabaseQueryRequest{
+		PageSize: 1,
+		PropertyFilter: &notionapi.PropertyFilter{
+			Property: "Name",
+			Text: &notionapi.TextFilterCondition{
+				Equals: query,
+			},
+		},
+	})
+	return
+}
+
+func (n *Notion) SearchNote(databaseID, query string) (page *notionapi.DatabaseQueryResponse, err error) {
+	page, err = n.Client.Database.Query(context.Background(), notionapi.DatabaseID(databaseID), &notionapi.DatabaseQueryRequest{
+		PageSize: 1,
+		PropertyFilter: &notionapi.PropertyFilter{
+			Property: "Name",
+			Text: &notionapi.TextFilterCondition{
+				Contains: query,
+			},
+		},
+	})
+	return
+}
+
+func (n *Notion) FindNote(databaseID, query string) (page *notionapi.DatabaseQueryResponse, err error) {
+	page, err = n.GetNote(databaseID, query)
+	if len(page.Results) == 0 {
+		page, err = n.SearchNote(databaseID, query)
+	}
+	if len(page.Results) == 0 {
+		err = errors.New("Cant't find note")
+	}
 	return
 }

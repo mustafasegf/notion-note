@@ -57,6 +57,17 @@ func (svc *Line) GetLatestNote(userID string) (page *notionapi.DatabaseQueryResp
 	return
 }
 
+func (svc *Line) FindNote(userID, query string) (page *notionapi.DatabaseQueryResponse, err error) {
+	creds, err := svc.GetNotionCreds(userID)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	notion := core.Notion{Client: notionapi.NewClient(notionapi.Token(creds.Token))}
+	page, err = notion.FindNote(creds.DatabaseID, query)
+	return
+}
+
 func (svc *Line) AppendNote(userID, pageID, body string) (status string, err error) {
 	creds, err := svc.GetNotionCreds(userID)
 	if err != nil {
