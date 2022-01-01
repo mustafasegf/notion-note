@@ -7,7 +7,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
     volumes:
-      - ~/mongo/data:/data/db
+      - db-data:/data/db
     networks:
       - notion-note
 
@@ -24,7 +24,11 @@ services:
       - MONGO_HOST=mongo
     networks:
       - notion-note
-    command: ["/app/main"]
+    command: [ "/app/main" ]
+
+volumes:
+  db-data:
+    driver: local
 
 networks:
   notion-note:
