@@ -1,4 +1,4 @@
-package service
+package notes
 
 import (
 	"fmt"
@@ -7,31 +7,29 @@ import (
 
 	"github.com/jomei/notionapi"
 	"github.com/line/line-bot-sdk-go/v7/linebot"
-	"github.com/mustafasegf/notion-note/core"
 	"github.com/mustafasegf/notion-note/entity"
-	"github.com/mustafasegf/notion-note/repo"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type Line struct {
+type Service struct {
 	bot  *linebot.Client
-	repo *repo.Line
+	repo *Repo
 }
 
-func NewLineService(bot *linebot.Client, repo *repo.Line) *Line {
-	return &Line{
+func NewService(bot *linebot.Client, repo *Repo) *Service {
+	return &Service{
 		bot:  bot,
 		repo: repo,
 	}
 }
 
-func (svc *Line) CreateNote(userID, title, body, tags string) (status string, err error) {
+func (svc *Service) CreateNote(userID, title, body, tags string) (status string, err error) {
 	creds, err := svc.GetNotionCreds(userID)
 	if err != nil {
 		status = err.Error()
 		return
 	}
-	notion := core.Notion{Client: notionapi.NewClient(notionapi.Token(creds.Token))}
+	notion := HttpRequest{Client: notionapi.NewClient(notionapi.Token(creds.Token))}
 	if tags == "" {
 		_, err = notion.CreateNote(title, body, creds.DatabaseID)
 	} else {
@@ -46,35 +44,35 @@ func (svc *Line) CreateNote(userID, title, body, tags string) (status string, er
 	return
 }
 
-func (svc *Line) GetLatestNote(userID string) (page *notionapi.DatabaseQueryResponse, err error) {
+func (svc *Service) GetLatestNote(userID string) (page *notionapi.DatabaseQueryResponse, err error) {
 	creds, err := svc.GetNotionCreds(userID)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	notion := core.Notion{Client: notionapi.NewClient(notionapi.Token(creds.Token))}
+	notion := HttpRequest{Client: notionapi.NewClient(notionapi.Token(creds.Token))}
 	page, err = notion.GetLatestNote(creds.DatabaseID)
 	return
 }
 
-func (svc *Line) FindNote(userID, query string) (page *notionapi.DatabaseQueryResponse, err error) {
+func (svc *Service) FindNote(userID, query string) (page *notionapi.DatabaseQueryResponse, err error) {
 	creds, err := svc.GetNotionCreds(userID)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	notion := core.Notion{Client: notionapi.NewClient(notionapi.Token(creds.Token))}
+	notion := HttpRequest{Client: notionapi.NewClient(notionapi.Token(creds.Token))}
 	page, err = notion.FindNote(creds.DatabaseID, query)
 	return
 }
 
-func (svc *Line) AppendNote(userID, pageID, body string) (status string, err error) {
+func (svc *Service) AppendNote(userID, pageID, body string) (status string, err error) {
 	creds, err := svc.GetNotionCreds(userID)
 	if err != nil {
 		status = err.Error()
 		return
 	}
-	notion := core.Notion{Client: notionapi.NewClient(notionapi.Token(creds.Token))}
+	notion := HttpRequest{Client: notionapi.NewClient(notionapi.Token(creds.Token))}
 	_, err = notion.AppendNote(pageID, body)
 	status = "successs"
 	if err != nil {
@@ -84,7 +82,7 @@ func (svc *Line) AppendNote(userID, pageID, body string) (status string, err err
 	return
 }
 
-func (svc *Line) UpdateToken(userID, token string) (status string) {
+func (svc *Service) UpdateToken(userID, token string) (status string) {
 	err := svc.repo.UpdateToken(userID, token)
 	status = "successs"
 	if err != nil {
@@ -94,7 +92,7 @@ func (svc *Line) UpdateToken(userID, token string) (status string) {
 	return
 }
 
-func (svc *Line) UpdateDatabase(userID, databaseID string) (status string) {
+func (svc *Service) UpdateDatabase(userID, databaseID string) (status string) {
 	err := svc.repo.UpdateDatabase(userID, databaseID)
 	status = "successs"
 	if err != nil {
@@ -104,7 +102,7 @@ func (svc *Line) UpdateDatabase(userID, databaseID string) (status string) {
 	return
 }
 
-func (svc *Line) GetNotionCreds(userID string) (res entity.NotionCreds, err error) {
+func (svc *Service) GetNotionCreds(userID string) (res entity.NotionCreds, err error) {
 	res, err = svc.repo.GetNotionCreds(userID)
 	if err != nil && err != mongo.ErrNoDocuments {
 		log.Println(err)

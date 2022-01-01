@@ -3,17 +3,16 @@ package api
 import (
 	"net/http"
 
-	"github.com/mustafasegf/notion-note/controller"
-	"github.com/mustafasegf/notion-note/repo"
-	"github.com/mustafasegf/notion-note/service"
+	"github.com/mustafasegf/notion-note/notes"
 )
 
 func (s *Server) SetupRouter() {
-	lineRepo := repo.NewLineRepo(s.Db)
-	lineService := service.NewLineService(s.Line, lineRepo)
-	lineController := controller.NewLineController(s.Line, lineService)
+	lineRepo := notes.NewRepo(s.Db)
+	lineService := notes.NewService(s.Line, lineRepo)
+	lineController := notes.NewController(s.Line, lineService)
+
 	http.HandleFunc("/callback", lineController.LineCallback)
 	http.HandleFunc("/", func(rw http.ResponseWriter, r *http.Request) {
-		rw.Write([]byte("yes"))
+		rw.Write([]byte("health check"))
 	})
 }
