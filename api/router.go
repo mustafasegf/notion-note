@@ -12,5 +12,5 @@ func (s *Server) SetupRouter() {
 	lineController := notes.NewController(s.Line, lineService)
 
 	http.HandleFunc("/callback/line", lineController.LineCallback)
-	http.Handle("/", http.FileServer(http.Dir("./template")))
+	http.Handle("/", http.FileServer(http.Dir("./templates")))
 }
